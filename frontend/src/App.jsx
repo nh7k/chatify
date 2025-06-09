@@ -1,4 +1,5 @@
 import Navbar from "./components/Navbar";
+import LoadingScreen from "./components/LoadingScreen";
 
 import HomePage from "./pages/HomePage";
 import SignUpPage from "./pages/SignUpPage";
@@ -9,29 +10,31 @@ import ProfilePage from "./pages/ProfilePage";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuthStore } from "./store/useAuthStore";
 import { useThemeStore } from "./store/useThemeStore";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
-import { Loader } from "lucide-react";
 import { Toaster } from "react-hot-toast";
 
 const App = () => {
   const { authUser, checkAuth, isCheckingAuth, onlineUsers } = useAuthStore();
   const { theme } = useThemeStore();
+  const [isLoading, setIsLoading] = useState(true);
 
   console.log({ onlineUsers });
 
   useEffect(() => {
     checkAuth();
+    // Add a minimum loading time of 2 seconds
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 2000);
+    return () => clearTimeout(timer);
   }, [checkAuth]);
 
   console.log({ authUser });
 
-  if (isCheckingAuth && !authUser)
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <Loader className="size-10 animate-spin" />
-      </div>
-    );
+  if (isLoading || (isCheckingAuth && !authUser)) {
+    return <LoadingScreen />;
+  }
 
   return (
     <div data-theme={theme}>
